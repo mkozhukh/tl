@@ -15,6 +15,6 @@ var createCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		return printJSON(list)
+		return printJSON(map[string]int64{"id": list.ID})
 	},
 }

@@ -26,7 +26,7 @@ var addCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		return printJSON(task)
+		return printJSON(map[string]int64{"id": task.ID})
 	},
 }
 

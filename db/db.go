@@ -24,6 +24,7 @@ type Task struct {
 	Meta      *string `json:"meta,omitempty"`
 	Result    *string `json:"result,omitempty"`
 	Reason    *string `json:"reason,omitempty"`
+	Owner     *string `json:"owner,omitempty"`
 	CreatedAt string  `json:"created_at"`
 	UpdatedAt string  `json:"updated_at"`
 }
@@ -54,9 +55,12 @@ CREATE TABLE IF NOT EXISTS tasks (
 	meta TEXT,
 	result TEXT,
 	reason TEXT,
+	owner TEXT,
 	created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 	updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE INDEX IF NOT EXISTS idx_tasks_owner ON tasks(owner);
 
 CREATE INDEX IF NOT EXISTS idx_tasks_list_status ON tasks(list_id, status);
 `

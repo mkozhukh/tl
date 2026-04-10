@@ -42,6 +42,7 @@ func init() {
 	rootCmd.AddCommand(listCmd)
 	rootCmd.AddCommand(getCmd)
 	rootCmd.AddCommand(resetCmd)
+	rootCmd.AddCommand(tasksCmd)
 }
 
 func Execute() int {

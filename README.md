@@ -28,9 +28,12 @@ tl create "migrate-tables"
 tl add 1 "users table" --meta '{"file":"users.sql"}'
 tl add 1 "orders table"
 
-# sub-agent claims next available task
-tl next 1
-# {"id":1,"list_id":1,"title":"users table","status":"active","meta":"{\"file\":\"users.sql\"}",…}
+# sub-agent claims next available task (optionally identifying itself)
+tl next 1 --owner agent-7
+# {"id":1,"title":"users table","status":"active","file":"users.sql","owner":"agent-7"}
+
+# or claim a specific task by ID
+tl next 1 2 --owner agent-7
 
 # mark done with result data
 tl done 1 --result '{"rows":42}'
@@ -45,15 +48,17 @@ tl reset 2
 ## Commands
 
 ```
-tl create <name>                        Create a task list
-tl add <list-id> <title> [--meta '{}']  Add a task
-tl next <list-id>                       Claim next pending task (atomic)
-tl done <task-id> [--result '{}']       Mark task done
-tl fail <task-id> [--reason "..."]      Mark task failed
-tl status <list-id>                     Task counts by state
-tl list                                 All lists with counts
-tl get <task-id>                        Get a single task
-tl reset <task-id>                      Reset failed/active → pending
+tl create <name>                             Create a task list
+tl add <list-id> <title> [--meta '{}']       Add a task
+tl next <list-id> [task-id] [--owner <id>]   Claim next pending task, or a specific one (atomic)
+tl done <task-id> [--result '{}']            Mark task done
+tl fail <task-id> [--reason "..."]           Mark task failed
+tl status <list-id>                          Task counts by state
+tl list                                      All lists with counts
+tl tasks <list-id> [--status <s>]            List tasks, optionally filtered by status
+                   [--owner <id>]            Filter by owner (combinable with --status)
+tl get <task-id>                             Get a single task
+tl reset <task-id>                           Reset failed/active → pending
 ```
 
 ## Design

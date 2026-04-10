@@ -22,7 +22,7 @@ var failCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		return printJSON(task)
+		return printTask(task)
 	},
 }
 

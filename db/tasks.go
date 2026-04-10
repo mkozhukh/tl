@@ -7,11 +7,11 @@ import (
 
 func scanTask(row interface{ Scan(...any) error }) (*Task, error) {
 	t := &Task{}
-	err := row.Scan(&t.ID, &t.ListID, &t.Title, &t.Status, &t.Meta, &t.Result, &t.Reason, &t.CreatedAt, &t.UpdatedAt)
+	err := row.Scan(&t.ID, &t.ListID, &t.Title, &t.Status, &t.Meta, &t.Result, &t.Reason, &t.Owner, &t.CreatedAt, &t.UpdatedAt)
 	return t, err
 }
 
-const taskCols = `id, list_id, title, status, meta, result, reason, created_at, updated_at`
+const taskCols = `id, list_id, title, status, meta, result, reason, owner, created_at, updated_at`
 
 func AddTask(db *sql.DB, listID int64, title string, meta string) (*Task, error) {
 	var metaPtr *string
@@ -32,15 +32,36 @@ func GetTask(db *sql.DB, taskID int64) (*Task, error) {
 	return t, err
 }
 
-func ClaimNextTask(db *sql.DB, listID int64) (*Task, error) {
+func ClaimNextTask(db *sql.DB, listID int64, owner string) (*Task, error) {
+	var ownerPtr *string
+	if owner != "" {
+		ownerPtr = &owner
+	}
 	t, err := scanTask(db.QueryRow(`
-		UPDATE tasks SET status = 'active', updated_at = CURRENT_TIMESTAMP
+		UPDATE tasks SET status = 'active', owner = ?, updated_at = CURRENT_TIMESTAMP
 		WHERE id = (SELECT id FROM tasks WHERE list_id = ? AND status = 'pending' ORDER BY id LIMIT 1)
 		RETURNING `+taskCols,
-		listID,
+		ownerPtr, listID,
 	))
 	if err == sql.ErrNoRows {
 		return nil, ErrNoTasks
+	}
+	return t, err
+}
+
+func ClaimTask(db *sql.DB, taskID int64, owner string) (*Task, error) {
+	var ownerPtr *string
+	if owner != "" {
+		ownerPtr = &owner
+	}
+	t, err := scanTask(db.QueryRow(`
+		UPDATE tasks SET status = 'active', owner = ?, updated_at = CURRENT_TIMESTAMP
+		WHERE id = ? AND status = 'pending'
+		RETURNING `+taskCols,
+		ownerPtr, taskID,
+	))
+	if err == sql.ErrNoRows {
+		return nil, fmt.Errorf("task %d not found or not pending", taskID)
 	}
 	return t, err
 }
@@ -90,6 +111,34 @@ func ResetTask(db *sql.DB, taskID int64) (*Task, error) {
 		return nil, fmt.Errorf("task %d not found or not in active/failed state", taskID)
 	}
 	return t, err
+}
+
+func GetListTasks(db *sql.DB, listID int64, status, owner string) ([]*Task, error) {
+	query := `SELECT ` + taskCols + ` FROM tasks WHERE list_id = ?`
+	args := []any{listID}
+	if status != "" {
+		query += ` AND status = ?`
+		args = append(args, status)
+	}
+	if owner != "" {
+		query += ` AND owner = ?`
+		args = append(args, owner)
+	}
+	query += ` ORDER BY id`
+	rows, err := db.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var tasks []*Task
+	for rows.Next() {
+		t, err := scanTask(rows)
+		if err != nil {
+			return nil, err
+		}
+		tasks = append(tasks, t)
+	}
+	return tasks, rows.Err()
 }
 
 func GetListStatus(db *sql.DB, listID int64) (*ListStatus, error) {
