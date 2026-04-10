@@ -1,4 +1,4 @@
-module tl
+module github.com/mkozhukh/tl
 
 go 1.25.0
 

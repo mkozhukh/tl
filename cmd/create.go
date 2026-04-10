@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"tl/db"
+	"github.com/mkozhukh/tl/db"
 
 	"github.com/spf13/cobra"
 )

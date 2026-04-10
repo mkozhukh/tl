@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"os"
-	"tl/db"
+	"github.com/mkozhukh/tl/db"
 
 	"github.com/spf13/cobra"
 )

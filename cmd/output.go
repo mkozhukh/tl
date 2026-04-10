@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"tl/db"
+	"github.com/mkozhukh/tl/db"
 )
 
 func printJSON(v any) error {

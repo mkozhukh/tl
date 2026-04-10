@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 	"strconv"
-	"tl/db"
+	"github.com/mkozhukh/tl/db"
 
 	"github.com/spf13/cobra"
 )

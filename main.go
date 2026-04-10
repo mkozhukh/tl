@@ -2,7 +2,7 @@ package main
 
 import (
 	"os"
-	"tl/cmd"
+	"github.com/mkozhukh/tl/cmd"
 )
 
 func main() {
